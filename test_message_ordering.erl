@@ -1,4 +1,4 @@
--module(init_message_ordering).
+-module(test_message_ordering).
 
 -export([
 	test_best_case/2,
@@ -50,7 +50,10 @@ process(Messages, K) ->
 
 %% Инициирующее сообщение
 process([], _K, Tasks) ->
-	[{result, maps:to_list(Tasks)}];
+	ResultList = maps:to_list(Tasks),
+	ElapsedTimeList = [E || {_, #task{elapsed_time = E}} <- ResultList],
+	LatencyList = [L || {_, #task{latency = L}} <- ResultList],
+	[{min_elapsed, lists:min(ElapsedTimeList)}, {max_elapsed, lists:max(ElapsedTimeList)}, {min_latency, lists:min(LatencyList)}, {max_latency, lists:max(LatencyList)}, {result, ResultList}];
 process([{SessionId, initial} | Tail], K, Tasks) ->
 	ElapcedTime = ?WORKER_CAPABILITY,
        	Task = #task{id = SessionId, elapsed_time = ElapcedTime},
